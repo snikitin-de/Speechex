@@ -1,5 +1,6 @@
 import os
 import telebot
+import pydub
 import speech
 import utils
 
@@ -22,14 +23,20 @@ def echo_message(message):
     filepath = os.path.join(root_dir, r'audio\message_' + datetime.now().strftime("%d-%m-%Y_%H-%M-%S"))
     wav_file = filepath + '.wav'
 
-    utils.convert_ogg_to_wav(filepath, downloaded_file)
+    try:
+        utils.convert_ogg_to_wav(filepath, downloaded_file)
+    except pydub.exceptions.CouldntDecodeError:
+        bot.reply_to(message, "I can't transform this audio!")
 
-    recognized_text = speech.speech_to_text(wav_file)
+    try:
+        recognized_text = speech.speech_to_text(wav_file)
 
-    utils.delete_audio_file(filepath + '.ogg')
-    utils.delete_audio_file(wav_file)
+        utils.delete_audio_file(filepath + '.ogg')
+        utils.delete_audio_file(wav_file)
 
-    bot.reply_to(message, recognized_text)
+        bot.reply_to(message, recognized_text)
+    except FileNotFoundError:
+        bot.reply_to(message, "I can't transform this audio!")
 
 
 if __name__ == '__main__':
