@@ -10,8 +10,9 @@ Bot for converting audio message to text.
 
 1. Download source code;
 3. In the terminal:
-   1. Enter the command `cd %APP_PATH%` to go to the folder with the program, where `%APP_PATH%` is path to the folder into which the source code was downloaded;
-   2. Enter the command `pip install -r requirements.txt` to install required libraries.
+   1. Enter the command `sudo apt install ffmpeg` to install ffmpeg on Ubuntu. If you are using Windows, you need to download ffmpeg from https://ffmpeg.org/download.html;
+   2. Enter the command `cd %APP_PATH%` to go to the folder with the program, where `%APP_PATH%` is path to the folder into which the source code was downloaded;
+   3. Enter the command `pip install -r requirements.txt` to install required libraries.
 
 ## Usage
 
