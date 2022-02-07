@@ -5,8 +5,13 @@ import speech
 import utils
 
 from datetime import datetime
+from dotenv import load_dotenv
 
-bot = telebot.TeleBot("you-telegram-api-bot-token")
+load_dotenv('.env')
+
+BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+
+bot = telebot.TeleBot(BOT_TOKEN)
 
 root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
