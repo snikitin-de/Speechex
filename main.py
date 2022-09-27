@@ -28,8 +28,11 @@ def echo_message(message):
     filepath = os.path.join(root_dir, r'audio\message_' + datetime.now().strftime("%d-%m-%Y_%H-%M-%S"))
     wav_file = filepath + '.wav'
 
+    with open(filepath + '.ogg', 'wb') as audio_file:
+        audio_file.write(downloaded_file)
+
     try:
-        utils.convert_ogg_to_wav(filepath, downloaded_file)
+        utils.convert_ogg_to_wav(filepath)
     except pydub.exceptions.CouldntDecodeError:
         bot.reply_to(message, "I can't transform this audio!")
 
