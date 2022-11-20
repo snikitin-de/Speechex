@@ -14,7 +14,7 @@ root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 
 @bot.message_handler(commands=['start'])
-def send_echo(message):
+def send_welcome_message(message):
     bot.send_message(message.chat.id,
                      'Hi! I will help you to transcribe audio, video messages and video notes into text. Let\'s go!')
 
