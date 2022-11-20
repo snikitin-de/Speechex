@@ -13,9 +13,10 @@ bot = telebot.TeleBot(BOT_TOKEN)
 root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 
-@bot.message_handler(commands=['start', 'hi'])
+@bot.message_handler(commands=['start'])
 def send_echo(message):
-    bot.send_message(message.chat.id, 'Hi!')
+    bot.send_message(message.chat.id,
+                     'Hi! I will help you to transcribe audio, video messages and video notes into text. Let\'s go!')
 
 
 @bot.message_handler(content_types=['voice', 'video_note'])
