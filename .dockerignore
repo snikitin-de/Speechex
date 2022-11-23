@@ -1,0 +1,6 @@
+/venv/
+/.idea/
+/audio/
+__pycache__
+.gitignore
+README.md
