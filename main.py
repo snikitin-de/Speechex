@@ -39,10 +39,9 @@ def download_audio_from_message(message):
 def transcribe_message(message):
     # Download audio file
     audio_path = download_audio_from_message(message)
-    # Detect the spoken language
-    language = speech_recognition.detect_language(audio_path)
+
     # Transcribe audio
-    message_text = speech_recognition.transcribe_audio(audio_path, language)
+    message_text = speech_recognition.transcribe_audio(audio_path)
     # Delete audio file
     os.remove(audio_path)
 

@@ -1,22 +1,24 @@
-FROM python:3.10-slim-buster AS builder
+FROM python:3.11-slim-buster
 
 # set variables
+# python variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+# whisper variables
+ENV WHISPER_MODEL small
+ENV WHISPER_DEVICE cpu
+ENV WHISPER_COMPUTE_TYPE int8
+ENV WHISPER_BEAM_SIZE 5
 
 # set work directory
-WORKDIR /app
+WORKDIR /opt/speechex
+
 # copy project
-COPY . /app
+COPY . /opt/speechex
 
 # install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends\
-    ffmpeg \
-    wget \
-    git \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir -r requirements.txt \ 
-    && wget -P /root/.cache/whisper https://openaipublic.azureedge.net/main/whisper/models/9ecf779972d90ba49c06d968637d720dd632c55bbf19d441fb42bf17a411e794/small.pt
-    
+RUN apt-get update
+RUN pip install --no-cache-dir -r /opt/speechex/requirements.txt
+
 # run app
 CMD ["python", "main.py"]

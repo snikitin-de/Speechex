@@ -2,5 +2,6 @@
 /.idea/
 /audio/
 __pycache__
+.env
 .gitignore
 README.md
