@@ -1,42 +1,26 @@
 import os
-import whisper
+from faster_whisper import WhisperModel
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv('.env')
 
 # Set whisper options
-model = whisper.load_model(os.environ.get('WHISPER_MODEL'))
-
-
-# Detect the spoken language
-def detect_language(audio_path):
-    try:
-        # Load audio and pad/trim it to fit 30 seconds
-        audio = whisper.load_audio(audio_path)
-        audio = whisper.pad_or_trim(audio)
-
-        # Make log-Mel spectrogram and move to the same device as the model
-        mel = whisper.log_mel_spectrogram(audio).to(model.device)
-
-        # Detect the spoken language
-        _, probs = model.detect_language(mel)
-
-        return max(probs, key=probs.get)
-    except Exception:
-        return "en"
+model = WhisperModel(os.environ.get('WHISPER_MODEL'),
+                     device=os.environ.get('WHISPER_DEVICE'),
+                     compute_type=os.environ.get('WHISPER_COMPUTE_TYPE'))
 
 
 # Transcribe audio
-def transcribe_audio(audio_path, language):
+def transcribe_audio(audio_path):
     try:
-        # Set whisper options
-        options = dict(language=language)
-        transcribe_options = dict(task="transcribe", **options)
-
         # Transcribe audio
-        transcribed_text = model.transcribe(audio_path, **transcribe_options)["text"]
+        segments, info = model.transcribe(audio_path, beam_size=int(os.environ.get('WHISPER_BEAM_SIZE')))
+        transcripted_text = ""
 
-        return transcribed_text
+        if info.language_probability > 0.7:
+            transcripted_text = ''.join([segment.text for segment in segments]).strip()
+
+        return transcripted_text
     except Exception:
         return ""
