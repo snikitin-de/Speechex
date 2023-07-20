@@ -1,7 +1,8 @@
 import telebot
+import main
 
 
 class ExceptionHandler(telebot.ExceptionHandler):
     def handle(self, exception):
-        logger.error(exception)
+        main.logger.error(exception)
         return True
