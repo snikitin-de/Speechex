@@ -14,11 +14,10 @@ ENV WHISPER_BEAM_SIZE 5
 WORKDIR /opt/speechex
 
 # copy project
-COPY . /opt/speechex
+COPY . .
 
-# install dependencies
-RUN apt-get update
-RUN pip install --no-cache-dir -r /opt/speechex/requirements.txt
+# install requirements
+RUN pip install --no-cache-dir -r requirements.txt
 
 # run app
 CMD ["python", "main.py"]
