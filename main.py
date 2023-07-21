@@ -105,4 +105,4 @@ if __name__ == '__main__':
     if not os.path.exists(audio_path):
         os.mkdir(audio_path)
 
-    bot.polling(none_stop=True)
+    bot.infinity_polling()
