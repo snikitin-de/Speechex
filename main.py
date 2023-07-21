@@ -1,16 +1,22 @@
 import os
 import telebot
+import logging
 import speech_recognition
+import handlers
 from dotenv import load_dotenv
 
+logging.basicConfig(level=logging.INFO,
+                    format="[%(asctime)s] %(name)s %(levelname)s %(message)s")
+logger = logging.getLogger("speechex")
 
 # Load environment variables
 load_dotenv('.env')
 
+root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
 # Set bot options
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
-bot = telebot.TeleBot(BOT_TOKEN)
-root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+bot = telebot.TeleBot(BOT_TOKEN, exception_handler=handlers.ExceptionHandler())
 
 
 # Download audio file
@@ -29,8 +35,11 @@ def download_audio_from_message(message):
     downloaded_file = bot.download_file(file_info.file_path)
     audio_path = os.path.join(root_dir, f'audio\\message_{message.date}_{message.id}.ogg')
 
-    with open(audio_path, 'wb') as audio_file:
-        audio_file.write(downloaded_file)
+    try:
+        with open(audio_path, 'wb') as audio_file:
+            audio_file.write(downloaded_file)
+    except OSError as e:
+        logger.error(e)
 
     return audio_path
 
@@ -43,10 +52,14 @@ def transcribe_message(message):
     # Transcribe audio
     message_text = speech_recognition.transcribe_audio(audio_path)
     # Delete audio file
-    os.remove(audio_path)
+    if os.path.exists(audio_path):
+        os.remove(audio_path)
+    else:
+        logger.error("Audio file not found")
 
     if message_text == "":
-        message_text = "No words recognized."
+        message_text = "Speech in the audio file is not recognized or is absent."
+        logger.info("Speech in the audio file is not recognized or is absent")
 
     return message_text
 
@@ -61,8 +74,10 @@ def send_welcome_message(message):
 @bot.message_handler(content_types=['voice', 'video_note'])
 def transcribe_message_auto(message):
     bot.reply_to(message, "[...]")
+    logger.info(f"Start message {message.id} processing in chat {message.chat.id}")
     message_text = transcribe_message(message)
     bot.edit_message_text(chat_id=message.chat.id, text=message_text, message_id=message.id + 1)
+    logger.info(f"End message {message.id} processing in chat {message.chat.id} ")
 
 
 # Transcribe message into text manually
@@ -71,12 +86,17 @@ def transcribe_message_manually(message):
     if message.reply_to_message is not None:
         if message.reply_to_message.content_type in ("voice", "video_note", "video"):
             bot.reply_to(message.reply_to_message, "[...]")
+            logger.info(f"Start message {message.reply_to_message.id} processing in chat {message.chat.id}")
             message_text = transcribe_message(message.reply_to_message)
             bot.edit_message_text(chat_id=message.chat.id, text=message_text, message_id=message.id + 1)
+            logger.info(f"End message {message.reply_to_message.id} processing in chat {message.chat.id}")
         else:
-            bot.reply_to(message.reply_to_message, "Invalid type to transcribating message.")
+            bot.reply_to(message.reply_to_message, "Incorrect message type for speech recognition.")
+            logger.info(f"Incorrect message {message.reply_to_message.id} type in chat {message.chat.id} "
+                        f"for speech recognition")
     else:
-        bot.reply_to(message, "Invalid type to transcribating message.")
+        bot.reply_to(message, "Incorrect message type for speech recognition.")
+        logger.info(f"Incorrect message {message.id} type in chat {message.chat.id} for speech recognition")
 
 
 if __name__ == '__main__':
