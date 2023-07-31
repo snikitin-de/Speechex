@@ -76,7 +76,19 @@ def transcribe_message_auto(message):
     bot.reply_to(message, "[...]")
     logger.info(f"Start message {message.id} processing in chat {message.chat.id}")
     message_text = transcribe_message(message)
-    bot.edit_message_text(chat_id=message.chat.id, text=message_text, message_id=message.id + 1)
+    if len(message_text) > 4096:
+        for x in range(0, len(message_text), 4096):
+            if x == 0:
+                bot.edit_message_text(chat_id=message.chat.id,
+                                      text=message_text[x:x + 4096],
+                                      message_id=message.id + 1)
+            else:
+                bot.send_message(chat_id=message.chat.id,
+                                 text=message_text[x:x + 4096])
+    else:
+        bot.edit_message_text(chat_id=message.chat.id,
+                              text=message_text,
+                              message_id=message.id + 1)
     logger.info(f"End message {message.id} processing in chat {message.chat.id} ")
 
 
@@ -88,7 +100,19 @@ def transcribe_message_manually(message):
             bot.reply_to(message.reply_to_message, "[...]")
             logger.info(f"Start message {message.reply_to_message.id} processing in chat {message.chat.id}")
             message_text = transcribe_message(message.reply_to_message)
-            bot.edit_message_text(chat_id=message.chat.id, text=message_text, message_id=message.id + 1)
+            if len(message_text) > 4096:
+                for x in range(0, len(message_text), 4096):
+                    if x == 0:
+                        bot.edit_message_text(chat_id=message.chat.id,
+                                              text=message_text[x:x + 4096],
+                                              message_id=message.id + 1)
+                    else:
+                        bot.send_message(chat_id=message.chat.id,
+                                         text=message_text[x:x + 4096])
+            else:
+                bot.edit_message_text(chat_id=message.chat.id,
+                                      text=message_text,
+                                      message_id=message.id + 1)
             logger.info(f"End message {message.reply_to_message.id} processing in chat {message.chat.id}")
         else:
             bot.reply_to(message.reply_to_message, "Incorrect message type for speech recognition.")
