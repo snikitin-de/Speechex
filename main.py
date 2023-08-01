@@ -90,16 +90,17 @@ def split_message(message, message_text):
 @bot.message_handler(content_types=['voice', 'video_note'])
 def transcribe_message_auto(message):
     duration = getattr(message, message.content_type).duration
-    if duration < 900:
+    file_size = getattr(message, message.content_type).file_size
+    if duration < 900 and file_size < 20000000:  # 15 minutes and 20 MB
         bot.reply_to(message, "[...]")
         logger.info(f"Start message {message.id} processing in chat {message.chat.id}")
         message_text = transcribe_message(message)
         split_message(message, message_text)
         logger.info(f"End message {message.id} processing in chat {message.chat.id} ")
     else:
-        bot.reply_to(message, "Audio in this message is too long.")
+        bot.reply_to(message, "Audio in this message is big long.")
         logger.info(f"Audio in message {message.id} in chat {message.chat.id} "
-                    f"is too long")
+                    f"is big long")
 
 
 # Transcribe message into text manually
@@ -109,16 +110,17 @@ def transcribe_message_manually(message):
         content_type = message.reply_to_message.content_type
         if content_type in ("voice", "video_note", "video"):
             duration = getattr(message.reply_to_message, content_type).duration
-            if duration < 900:
+            file_size = getattr(message.reply_to_message, message.reply_to_message.content_type).file_size
+            if duration < 900 and file_size < 20000000:  # 15 minutes and 20 MB
                 bot.reply_to(message.reply_to_message, "[...]")
                 logger.info(f"Start message {message.reply_to_message.id} processing in chat {message.chat.id}")
                 message_text = transcribe_message(message.reply_to_message)
                 split_message(message, message_text)
                 logger.info(f"End message {message.reply_to_message.id} processing in chat {message.chat.id}")
             else:
-                bot.reply_to(message.reply_to_message, "Audio in this message is too long.")
+                bot.reply_to(message.reply_to_message, "Audio in this message is too big.")
                 logger.info(f"Audio in message {message.reply_to_message.id} in chat {message.chat.id} "
-                            f"is too long")
+                            f"is too big")
         else:
             bot.reply_to(message.reply_to_message, "Incorrect message type for speech recognition.")
             logger.info(f"Incorrect message {message.reply_to_message.id} type in chat {message.chat.id} "
