@@ -70,12 +70,7 @@ def send_welcome_message(message):
                      'Hi! I will help you to transcribe audio, video messages and video notes into text. Let\'s go!')
 
 
-# Transcribe message into text automatically
-@bot.message_handler(content_types=['voice', 'video_note'])
-def transcribe_message_auto(message):
-    bot.reply_to(message, "[...]")
-    logger.info(f"Start message {message.id} processing in chat {message.chat.id}")
-    message_text = transcribe_message(message)
+def split_message(message, message_text):
     if len(message_text) > 4096:
         for x in range(0, len(message_text), 4096):
             if x == 0:
@@ -89,6 +84,15 @@ def transcribe_message_auto(message):
         bot.edit_message_text(chat_id=message.chat.id,
                               text=message_text,
                               message_id=message.id + 1)
+
+
+# Transcribe message into text automatically
+@bot.message_handler(content_types=['voice', 'video_note'])
+def transcribe_message_auto(message):
+    bot.reply_to(message, "[...]")
+    logger.info(f"Start message {message.id} processing in chat {message.chat.id}")
+    message_text = transcribe_message(message)
+    split_message(message, message_text)
     logger.info(f"End message {message.id} processing in chat {message.chat.id} ")
 
 
@@ -100,19 +104,7 @@ def transcribe_message_manually(message):
             bot.reply_to(message.reply_to_message, "[...]")
             logger.info(f"Start message {message.reply_to_message.id} processing in chat {message.chat.id}")
             message_text = transcribe_message(message.reply_to_message)
-            if len(message_text) > 4096:
-                for x in range(0, len(message_text), 4096):
-                    if x == 0:
-                        bot.edit_message_text(chat_id=message.chat.id,
-                                              text=message_text[x:x + 4096],
-                                              message_id=message.id + 1)
-                    else:
-                        bot.send_message(chat_id=message.chat.id,
-                                         text=message_text[x:x + 4096])
-            else:
-                bot.edit_message_text(chat_id=message.chat.id,
-                                      text=message_text,
-                                      message_id=message.id + 1)
+            split_message(message, message_text)
             logger.info(f"End message {message.reply_to_message.id} processing in chat {message.chat.id}")
         else:
             bot.reply_to(message.reply_to_message, "Incorrect message type for speech recognition.")
