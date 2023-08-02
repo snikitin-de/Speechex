@@ -21,15 +21,11 @@ bot = telebot.TeleBot(BOT_TOKEN, exception_handler=handlers.ExceptionHandler())
 
 # Download audio file
 def download_audio_from_message(message):
-    file_info = None
+    # Get content type of message
+    content_type = message.content_type
 
     # Get file id to downloading audio from message
-    if message.content_type == 'voice':
-        file_info = bot.get_file(message.voice.file_id)
-    elif message.content_type == 'video_note':
-        file_info = bot.get_file(message.video_note.file_id)
-    elif message.content_type == 'video':
-        file_info = bot.get_file(message.video.file_id)
+    file_info = bot.get_file(getattr(message, content_type).file_id)
 
     # Download audio file
     downloaded_file = bot.download_file(file_info.file_path)
@@ -45,15 +41,12 @@ def download_audio_from_message(message):
 
 
 # Transcribe message into text
-def transcribe_message(message):
-    # Download audio file
-    audio_path = download_audio_from_message(message)
-
+def transcribe_message(audio):
     # Transcribe audio
-    message_text = speech_recognition.transcribe_audio(audio_path)
+    message_text = speech_recognition.transcribe_audio(audio)
     # Delete audio file
-    if os.path.exists(audio_path):
-        os.remove(audio_path)
+    if os.path.exists(audio):
+        os.remove(audio)
     else:
         logger.error("Audio file not found")
 
@@ -94,7 +87,7 @@ def transcribe_message_auto(message):
     if duration < 900 and file_size < 20000000:  # 15 minutes and 20 MB
         bot.reply_to(message, "[...]")
         logger.info(f"Start message {message.id} processing in chat {message.chat.id}")
-        message_text = transcribe_message(message)
+        message_text = transcribe_message(download_audio_from_message(message))
         split_message(message, message_text)
         logger.info(f"End message {message.id} processing in chat {message.chat.id} ")
     else:
@@ -108,13 +101,13 @@ def transcribe_message_auto(message):
 def transcribe_message_manually(message):
     if message.reply_to_message is not None:
         content_type = message.reply_to_message.content_type
-        if content_type in ("voice", "video_note", "video"):
+        if content_type in ("voice", "audio", "video_note", "video"):
             duration = getattr(message.reply_to_message, content_type).duration
             file_size = getattr(message.reply_to_message, message.reply_to_message.content_type).file_size
             if duration < 900 and file_size < 20000000:  # 15 minutes and 20 MB
                 bot.reply_to(message.reply_to_message, "[...]")
                 logger.info(f"Start message {message.reply_to_message.id} processing in chat {message.chat.id}")
-                message_text = transcribe_message(message.reply_to_message)
+                message_text = transcribe_message(download_audio_from_message(message.reply_to_message))
                 split_message(message, message_text)
                 logger.info(f"End message {message.reply_to_message.id} processing in chat {message.chat.id}")
             else:
