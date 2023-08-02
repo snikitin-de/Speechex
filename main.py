@@ -99,8 +99,8 @@ def transcribe_message_auto(message):
         logger.info(f"End message {message.id} processing in chat {message.chat.id} ")
     else:
         bot.reply_to(message, "Audio in this message is big long.")
-        logger.info(f"Audio in message {message.id} in chat {message.chat.id} "
-                    f"is big long")
+        logger.info(f"Audio with duration of {duration} seconds and size of {file_size} bytes in "
+                    f"message {message.id} in chat {message.chat.id} is too big")
 
 
 # Transcribe message into text manually
@@ -119,8 +119,8 @@ def transcribe_message_manually(message):
                 logger.info(f"End message {message.reply_to_message.id} processing in chat {message.chat.id}")
             else:
                 bot.reply_to(message.reply_to_message, "Audio in this message is too big.")
-                logger.info(f"Audio in message {message.reply_to_message.id} in chat {message.chat.id} "
-                            f"is too big")
+                logger.info(f"Audio with duration of {duration} seconds and size of {file_size} bytes in "
+                            f"message {message.reply_to_message.id} in chat {message.chat.id} is too big")
         else:
             bot.reply_to(message.reply_to_message, "Incorrect message type for speech recognition.")
             logger.info(f"Incorrect message {message.reply_to_message.id} type in chat {message.chat.id} "
