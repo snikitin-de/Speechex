@@ -26,6 +26,8 @@ def download_audio_from_message(message):
     # Get file id to downloading audio from message
     if message.content_type == 'voice':
         file_info = bot.get_file(message.voice.file_id)
+    elif message.content_type == 'audio':
+        file_info = bot.get_file(message.audio.file_id)
     elif message.content_type == 'video_note':
         file_info = bot.get_file(message.video_note.file_id)
     elif message.content_type == 'video':
@@ -108,7 +110,7 @@ def transcribe_message_auto(message):
 def transcribe_message_manually(message):
     if message.reply_to_message is not None:
         content_type = message.reply_to_message.content_type
-        if content_type in ("voice", "video_note", "video"):
+        if content_type in ("voice", "audio", "video_note", "video"):
             duration = getattr(message.reply_to_message, content_type).duration
             file_size = getattr(message.reply_to_message, message.reply_to_message.content_type).file_size
             if duration < 900 and file_size < 20000000:  # 15 minutes and 20 MB
