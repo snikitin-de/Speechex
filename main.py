@@ -97,7 +97,7 @@ def transcribe_message_auto(message):
 
 
 # Transcribe message into text manually
-@bot.message_handler(commands=['transcribe'])
+@bot.message_handler(commands=['text'])
 def transcribe_message_manually(message):
     if message.reply_to_message is not None:
         content_type = message.reply_to_message.content_type
